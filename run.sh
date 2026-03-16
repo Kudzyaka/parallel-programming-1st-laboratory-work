@@ -1,8 +1,7 @@
 #!/bin/bash
 N=50000
 
-# Ищем gcc, установленный через brew
-# Версия может быть gcc-14 или gcc-15. Ищем рабочую.
+# Ищет gcc
 CC=""
 for cmd in "gcc-15" "gcc-14" "gcc-13" "gcc"; do
     if command -v $cmd &> /dev/null; then
@@ -11,9 +10,9 @@ for cmd in "gcc-15" "gcc-14" "gcc-13" "gcc"; do
     fi
 done
 
-echo "Используемый компилятор: $($CC --version | head -n 1)"
+echo "Итоговый компилятор: $($CC --version | head -n 1)"
 
-# Определяем расширение исполняемого файла для Windows
+# Определение расширения исполняемого файла для Windows
 EXT=""
 if [[ "$OSTYPE" == "msys"* ]] || [[ "$OSTYPE" == "cygwin"* ]] || [[ "$OSTYPE" == "win32"* ]]; then
     EXT=".exe"
@@ -44,7 +43,7 @@ function run_experiments() {
     echo "Тесты для $EXEC (Матрица $N x $N)"
     echo "=========================================="
     
-    echo "--- ОБХОД ПО СТРОКАМ (Обычно быстро: Cache Hits) ---"
+    echo "--- ОБХОД ПО СТРОКАМ ---"
     printf "1. Нули:           "
     ./$EXEC $N 0 0 | grep -o 'Время выполнения.*'
     
@@ -54,7 +53,7 @@ function run_experiments() {
     printf "3. Псевдослуч.:    "
     ./$EXEC $N 0 2 | grep -o 'Время выполнения.*'
     
-    echo "--- ОБХОД ПО СТОЛБЦАМ (Обычно медленно: Cache Misses) ---"
+    echo "--- ОБХОД ПО СТОЛБЦАМ ---"
     printf "4. Нули:           "
     ./$EXEC $N 1 0 | grep -o 'Время выполнения.*'
     
@@ -67,9 +66,9 @@ function run_experiments() {
 }
 
 # Очистка старого отчета и генерация нового
-echo "Запуск тестов... Это может занять несколько минут!"
+echo "Идёт тестирование..."
 run_experiments "matrix_O0$EXT" > report.txt
 run_experiments "matrix_O3$EXT" >> report.txt
 
-echo "Тесты завершены! Результаты сохранены в report.txt:"
+echo "Тестирование завершено! Результаты сохранены в report.txt:"
 cat report.txt
